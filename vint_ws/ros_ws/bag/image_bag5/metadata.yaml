@@ -1,0 +1,19 @@
+rosbag2_bagfile_information:
+  version: 4
+  storage_identifier: sqlite3
+  relative_file_paths:
+    - image_bag5_0.db3
+  duration:
+    nanoseconds: 290039153045
+  starting_time:
+    nanoseconds_since_epoch: 1717558150027515334
+  message_count: 545
+  topics_with_message_count:
+    - topic_metadata:
+        name: /Hololens/Image
+        type: sensor_msgs/msg/Image
+        serialization_format: cdr
+        offered_qos_profiles: ""
+      message_count: 545
+  compression_format: ""
+  compression_mode: ""

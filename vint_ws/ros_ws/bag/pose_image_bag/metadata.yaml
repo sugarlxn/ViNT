@@ -1,0 +1,25 @@
+rosbag2_bagfile_information:
+  version: 4
+  storage_identifier: sqlite3
+  relative_file_paths:
+    - pose_image_bag_0.db3
+  duration:
+    nanoseconds: 116237746014
+  starting_time:
+    nanoseconds_since_epoch: 1718524043500513993
+  message_count: 334
+  topics_with_message_count:
+    - topic_metadata:
+        name: /ble_controler/Image
+        type: sensor_msgs/msg/Image
+        serialization_format: cdr
+        offered_qos_profiles: ""
+      message_count: 219
+    - topic_metadata:
+        name: /ble_controler/pose
+        type: geometry_msgs/msg/PoseStamped
+        serialization_format: cdr
+        offered_qos_profiles: ""
+      message_count: 115
+  compression_format: ""
+  compression_mode: ""
