@@ -72,7 +72,7 @@ FLIP_ANG_VEL = np.pi/4
 
 # Globals
 vel_msg = Twist()
-waypoint = ROSData(WAYPOINT_TIMEOUT, name="waypoint")
+waypoint = ROSData(WAYPOINT_TIMEOUT, queue_size=1, name="waypoint")
 reached_goal = False
 reverse_mode = False
 current_yaw = None

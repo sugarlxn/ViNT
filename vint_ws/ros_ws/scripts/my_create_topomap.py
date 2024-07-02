@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 for ros2 foxy
 before run this script, you should run the following command:
@@ -16,11 +16,16 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from rclpy.clock import Clock
+from geometry_msgs.msg import PoseStamped
+import quaternion
+import numpy as np
 
 # IMAGE_TOPIC = "/Hololens/Image"
 IMAGE_TOPIC = "/ble_controler/Image"
 TOPOMAP_IMAGES_DIR = "../topomaps/images"
+POSE_TOPIC = "ble_controler/pose"
 obs_img = None
+obs_pose = None
 
 class CreateTopomap(Node):
     def __init__(self, name):
@@ -36,6 +41,26 @@ class CreateTopomap(Node):
             "/subgoals",
             10
         )
+        self.poseStamped_sub = self.create_subscription(PoseStamped,"/ble_controler/pose",self.pose_callback,1)
+
+    # 四元素转化成欧拉角
+    def quaternion_to_euler(self, poseStamp: PoseStamped):
+        q = np.quaternion(
+            poseStamp.pose.orientation.w,
+            poseStamp.pose.orientation.x,
+            poseStamp.pose.orientation.y,
+            poseStamp.pose.orientation.z)
+        euler = quaternion.as_euler_angles(q)
+
+        return euler
+    
+    def pose_callback(self, msg: PoseStamped):
+        global obs_pose
+        # euler = self.quaternion_to_euler(msg)
+        # print("x: ", msg.pose.position.x, "y: ", msg.pose.position.y, "yaw: ", euler[-1])
+        obs_pose = np.array([msg.pose.position.x, msg.pose.position.y,msg.pose.orientation.w,msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z])
+        # if self.file is not None:
+        #     self.file.write(str(msg.pose.position.x) + "," + str(msg.pose.position.y) + "," + str(euler[-1]) + ",\n")
 
     def callback_obs(self, msg: Image):
         global obs_img
@@ -56,7 +81,7 @@ def remove_files_in_dir(dir_path: str):
 
 
 def main(args: argparse.Namespace):
-    global obs_img
+    global obs_img, obs_pose
     rclpy.init()
     node = CreateTopomap("CREATE_TOPOMAP")
     topomap_name_dir = os.path.join(TOPOMAP_IMAGES_DIR, args.dir)
@@ -71,11 +96,14 @@ def main(args: argparse.Namespace):
 
     spin_thread = threading.Thread(target=rclpy.spin, args=(node,), daemon=True)
     spin_thread.start()
+
+    file = open(os.path.join(topomap_name_dir, "poses.csv"), "w")
+    file.write("index,x,y,w,x,y,z,else\n")
     print("Registered with master node. Waiting for images...")
     i = 0
     start_time = float("inf")
     while rclpy.ok():
-        if obs_img is not None:
+        if obs_img is not None and obs_pose is not None:
             # ROS2 图片格式 bgr8, PIL 图片格式 rgb
             # 转换图片格式
             # b,g,r = obs_img.split()
@@ -83,14 +111,17 @@ def main(args: argparse.Namespace):
             # rgb_image.save(os.path.join(topomap_name_dir, f"{i}.png"))
             obs_img.save(os.path.join(topomap_name_dir, f"{i}.png"))
             print(f"Saved image {i}.png")
+            file.write(f"{i},{obs_pose[0]},{obs_pose[1]},{obs_pose[2]},{obs_pose[3]},{obs_pose[4]},{obs_pose[5]},\n")
+            print(f"Saved pose {i}")
             i += 1
             obs_img = None
+            obs_pose = None
             start_time = Clock().now().nanoseconds/(10**9)
             rate.sleep()
         if Clock().now().nanoseconds/(10**9) - start_time > 5:
             print(f"Topic {IMAGE_TOPIC} not publishing anymore. Shutting down...")
             break
-    
+    file.close()
     rclpy.shutdown()
     spin_thread.join()
     print("Node shutdown")

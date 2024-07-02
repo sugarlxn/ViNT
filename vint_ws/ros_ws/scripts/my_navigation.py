@@ -113,10 +113,13 @@ def main(args: argparse.Namespace):
 
     
      # load topomap
-    topomap_filenames = sorted(os.listdir(os.path.join(
-        TOPOMAP_IMAGES_DIR, args.dir)), key=lambda x: int(x.split(".")[0]))
+    topomap_filenames = sorted(os.listdir(os.path.join(TOPOMAP_IMAGES_DIR, args.dir)))
+    # print(topomap_filenames)
+    if("poses.csv" in topomap_filenames):
+        topomap_filenames.remove("poses.csv")    
+    topomap_filenames = sorted(topomap_filenames, key=lambda x: int(x.split(".")[0]))
     topomap_dir = f"{TOPOMAP_IMAGES_DIR}/{args.dir}"
-    num_nodes = len(os.listdir(topomap_dir))
+    num_nodes = len(topomap_filenames) 
     topomap = []
     for i in range(num_nodes):
         image_path = os.path.join(topomap_dir, topomap_filenames[i])
@@ -125,7 +128,7 @@ def main(args: argparse.Namespace):
     closest_node = 0
     assert -1 <= args.goal_node < len(topomap), "Invalid goal index"
     if args.goal_node == -1:
-        goal_node = len(topomap) - 1
+        goal_node = len(topomap) - 2
     else:
         goal_node = args.goal_node
     reached_goal = False    
@@ -155,8 +158,8 @@ def main(args: argparse.Namespace):
         if len(context_queue) > model_params["context_size"]:
             if model_params["model_type"] == "nomad":
                 obs_images = transform_images(context_queue, model_params["image_size"], center_crop=False)
-                # obs_images = torch.split(obs_images, 3, dim=1)
-                # obs_images = torch.cat(obs_images, dim=1) 
+                obs_images = torch.split(obs_images, 3, dim=1)
+                obs_images = torch.cat(obs_images, dim=1) 
                 obs_images = obs_images.to(device)
                 mask = torch.zeros(1).long().to(device)  
 
@@ -309,7 +312,7 @@ if __name__=="__main__":
     parser.add_argument(
         "--waypoint",
         "-w",
-        default=2, # close waypoints exihibit straight line motion (the middle waypoint is a good default)
+        default=3, # close waypoints exihibit straight line motion (the middle waypoint is a good default)
         type=int,
         help=f"""index of the waypoint used for navigation (between 0 and 4 or 
         how many waypoints your model predicts) (default: 2)""",

@@ -16,3 +16,5 @@
 # 能导航
 ./my_navigation.py --dir=pose_image_bag3 --waypoint=4
 
+2024年6月21日21-30-53
+./my_navigation.py --dir=pose_image_bag7 --waypoint=3
