@@ -63,6 +63,7 @@ subgoal = []
 osb_pose = None
 sub_target_pose = None
 pose_index = 1
+distance_diff_old = 0
 
 # Load the model 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -139,7 +140,7 @@ class VisualNav(Node):
 
     ## 控制器
     def controler(self,osb_pose, sub_target_pose):
-        global pose_index
+        global pose_index, distance_diff_old
         if len(osb_pose)==3 and len(sub_target_pose)==3:
             x_diff = sub_target_pose[0] - osb_pose[0]
             y_diff = sub_target_pose[1] - osb_pose[1]
@@ -152,13 +153,18 @@ class VisualNav(Node):
                 x_diff = transform_vector[0]
                 y_diff = transform_vector[1]
             
+            # dt distance_diff
+            det_distance_diff = distance_diff - distance_diff_old
+            distance_diff_old = distance_diff
+
             if distance_diff < 0.3:
                 #到达sub_target_pose
                 pose_index+=1
-                return [0,0,0,0]
+                return [0,0,0,det_distance_diff]
             else:
                 #前进or后退，dx为x方向的距离，dy为y方向的距离  
-                return [2,x_diff,y_diff,0]
+                return [2,x_diff,y_diff,det_distance_diff]
+            
 
 def main(args: argparse.Namespace):
     global context_size, osb_pose, sub_target_pose, pose_index
@@ -394,8 +400,10 @@ def main(args: argparse.Namespace):
 
         #发布控制指令
         waypoint_msg = Float32MultiArray(data = [0,0])
-        # if closest_node >= pose_index:
-        if True:
+        if closest_node >= pose_index:
+        # if pose_waypoint[3] >= 0:
+        # if (pose_waypoint[2]*chosen_waypoint[1] <= 0):
+        # if True:
             #pose 控制
             if(len(pose_waypoint)==4 and pose_waypoint[0] == 0):
                 #到达子目标点
@@ -415,7 +423,7 @@ def main(args: argparse.Namespace):
         node.waypoint_pub.publish(waypoint_msg)
 
         # 到达目标点判定
-        reached_goal = (closest_node == goal_node and pose_index > max_row - 1)
+        reached_goal = (closest_node == goal_node)
         print(f"closeset_node: {closest_node},pose_index: {pose_index}, reached_goal: {reached_goal}")
         reached_goal_msg = Bool(data = bool(reached_goal))
         node.goal_pub.publish(reached_goal_msg)
