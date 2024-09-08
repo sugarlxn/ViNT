@@ -18,3 +18,9 @@
 
 2024年6月21日21-30-53
 ./my_navigation.py --dir=pose_image_bag7 --waypoint=3
+
+2024年7月5日
+./my_navigation2.py --dir=pose_image_min_bag11 --waypoint=3
+./my_navigation2.py --dir=pose_image_min_bag12 --waypoint=3
+pose_image_min_bag11 : 实验室内小圈topomap
+pose_image_min_bag12 : 绕实验室大圈topomap

@@ -400,10 +400,10 @@ def main(args: argparse.Namespace):
 
         #发布控制指令
         waypoint_msg = Float32MultiArray(data = [0,0])
-        if closest_node >= pose_index:
+        # if closest_node >= pose_index:
         # if pose_waypoint[3] >= 0:
         # if (pose_waypoint[2]*chosen_waypoint[1] <= 0):
-        # if True:
+        if True:
             #pose 控制
             if(len(pose_waypoint)==4 and pose_waypoint[0] == 0):
                 #到达子目标点
@@ -423,12 +423,12 @@ def main(args: argparse.Namespace):
         node.waypoint_pub.publish(waypoint_msg)
 
         # 到达目标点判定
-        reached_goal = (closest_node == goal_node)
+        reached_goal = (closest_node == goal_node and (pose_index > max_row - 1))
         print(f"closeset_node: {closest_node},pose_index: {pose_index}, reached_goal: {reached_goal}")
         reached_goal_msg = Bool(data = bool(reached_goal))
         node.goal_pub.publish(reached_goal_msg)
 
-        if pose_index > max_row - 1:
+        if pose_index > max_row - 1 or pose_index == goal_node:
             print("Reached the last pose! Stopping...")
             reached_goal_msg = Bool(data = bool(True))
             node.goal_pub.publish(reached_goal_msg)

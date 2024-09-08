@@ -40,8 +40,8 @@ import time
 
 
 # UTILS
-IMAGE_TOPIC = "/Hololens/Image"
-# IMAGE_TOPIC = "/ble_controler/Image"
+#IMAGE_TOPIC = "/Hololens/Image"
+IMAGE_TOPIC = "/ble_controler/Image"
 WAYPOINT_TOPIC = "/waypoint"
 SAMPLED_ACTIONS_TOPIC = "/sampled_actions"
 
@@ -187,23 +187,23 @@ def main(args: argparse.Namespace):
             naction = to_numpy(get_action(naction))
 
             #可视化8条naction，将黑色图片self.naction_image 发布出去
-            color_list = ["red","green","blue","yellow","black","white","purple","orange"]
-            color_index = 0
-            if node.naction_image != None:
-                origin_x = int(node.naction_image.width/2)
-                origin_y = int(node.naction_image.height*3/4)
-                for items in naction:
-                    for item in items:
-                        x1 = int(origin_x - item[1]*10)
-                        y1 = int(origin_y - item[0]*10)
-                        x2 = x1 + 1
-                        y2 = y1 + 1
-                        #在node.naction_image 上画点
-                        image_draw = ImageDraw.Draw(node.naction_image)
-                        image_draw.rectangle(xy=(x1,y1,x2,y2),fill=color_list[color_index%(len(color_list))])
-                    color_index += 1
-                image_msg = pil_to_msg(node.naction_image)
-                node.naction_image_pub.publish(image_msg)
+            # color_list = ["red","green","blue","yellow","black","white","purple","orange"]
+            # color_index = 0
+            # if node.naction_image != None:
+            #     origin_x = int(node.naction_image.width/2)
+            #     origin_y = int(node.naction_image.height*3/4)
+            #     for items in naction:
+            #         for item in items:
+            #             x1 = int(origin_x - item[1]*10)
+            #             y1 = int(origin_y - item[0]*10)
+            #             x2 = x1 + 1
+            #             y2 = y1 + 1
+            #             #在node.naction_image 上画点
+            #             image_draw = ImageDraw.Draw(node.naction_image)
+            #             image_draw.rectangle(xy=(x1,y1,x2,y2),fill=color_list[color_index%(len(color_list))])
+            #         color_index += 1
+            #     image_msg = pil_to_msg(node.naction_image)
+            #     node.naction_image_pub.publish(image_msg)
 
 
 
